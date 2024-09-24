@@ -26,6 +26,8 @@ df_loan_fixed_test=loan_analysis(amount=loan_amount, first_date=np.datetime64('2
 # df_loan_fixed_test.head()
 
 #%%
+df_loan_fixed_test
+#%%
 # Linear and annuity, monthly insallments
 fig, ax = plt.subplots()
 x = df_loan_fixed_test['payment_number'].to_numpy()

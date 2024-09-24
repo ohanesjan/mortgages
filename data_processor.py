@@ -66,7 +66,7 @@ def loan_analysis(amount: float, first_date, loan_period: int, fixed_period: int
     loan_pd.insert(0, 'payment_dates', pd.Series(payment_dates, index=index_list))
 
     # ----- Interest rates -----
-        #Number of payments per year, hard coded. ! introduce it as a variable  
+    #Number of payments per year, hard coded. TODO ! introduce it as a variable  
     n_yearly_payments=12
     var_period=loan_period-fixed_period
 
@@ -101,7 +101,7 @@ def loan_analysis(amount: float, first_date, loan_period: int, fixed_period: int
 
 
 
-        # -- annuity -- !! Works just for fully fixed period and with consant fixed interest
+    # -- annuity -- !! Works just for fully fixed period and with consant fixed interest
 
     
     #Annual Interest rate distributed over the number of annual payments
