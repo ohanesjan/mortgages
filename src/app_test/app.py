@@ -412,6 +412,20 @@ def mortgage_input_section(index):
                 key=f"maturity_{index}"
             )
         
+        col5, col6 =st.columns(2)
+
+        with col5:
+
+            start_month = st.number_input(
+                f"Enter Start Month for Mortgage {index + 1}:",
+                min_value=1,
+                max_value=1200,
+                value=1,
+                step=1,
+                key=f"start_month_{index}"
+            )
+
+
         st.markdown("**Bulk Repayments:**")
         bulk_repayments_input = st.text_area(
             f"Enter Bulk Repayments for Mortgage {index + 1} (format: month:amount, separated by commas):",
@@ -443,13 +457,15 @@ def mortgage_input_section(index):
         else:
             adjust = 'maturity'
         
+
         return {
             'type': mortgage_type.lower(),
             'rate': rate,
             'loan_value': loan_value,
             'maturity_months': maturity_months,
             'bulk_repayments': bulk_repayments,
-            'adjust': adjust
+            'adjust': adjust,
+            'start_month': start_month
         }
 
 # Collect inputs for mortgages
@@ -491,8 +507,9 @@ if st.button("Generate Plots"):
             schedules.append(schedule)
             labels.append(f"Mortgage {idx + 1}: {mortgage['type'].capitalize()} Adjust {mortgage['adjust'].capitalize()}")
 
-        # Combine the schedules (assuming all start at month 1)
-        loans = [(schedule, 1) for schedule in schedules]
+        # Modify the loans list to include start months
+        loans = [(schedule, mortgage['start_month']) for schedule, mortgage in zip(schedules, options_list)]
+
         combined_schedule = combine_mortgage_schedules(loans, total_property_value=total_property_value)
 
         # Identify the schedule with the lowest cumulative interest paid at the end

@@ -125,62 +125,26 @@ schedule_o4 = annuity_mortgage_schedule(
     adjust=adjustment_type,
     property_value=property_value
 )
-#%%
+
 
 ################# Options list #################
-options_list = [
-    # schedule_o1,
-    schedule_o2,
-    schedule_o3_combined,
-    schedule_o4
-]
-
+options_list = [schedule_o1,schedule_o2,schedule_o3_combined,schedule_o4]
 labels = [
-    # '350k mor',
-    '250k mor',
+    '350k mor',
+    '250k mor', 
     '220k mor + 30k loan',
     '250k mor 24m 30k repayment',
 ]
 colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']  # Blue, Orange, Green, Red
 
+# %%
 
 
-# Identify the schedule with the lowest cumulative interest paid at the end
-total_cumulative_interests = []
-for schedule in options_list:
-    total_cumulative_interests.append(schedule['cumulatively_paid_interest'].iloc[-1])
-
-# Find the index of the schedule with the lowest total cumulative interest
-min_interest_index = total_cumulative_interests.index(min(total_cumulative_interests))
-min_interest_schedule = options_list[min_interest_index]
-
-# Create a DataFrame to align cumulative interests over time
-# Find the maximum month across all schedules
-max_month = max([schedule['month'].max() for schedule in options_list])
-
-# Initialize a DataFrame with months as the index
-cumulative_interest_df = pd.DataFrame({'month': range(1, max_month + 1)})
-cumulative_interest_df.set_index('month', inplace=True)
-
-# Add cumulative interest data for each schedule
-for schedule, label in zip(options_list, labels):
-    # Reindex the cumulative interest to align months
-    temp = schedule.set_index('month')['cumulatively_paid_interest']
-    temp = temp.reindex(range(1, max_month + 1), method='ffill')  # Forward fill after loan is paid off
-    cumulative_interest_df[label] = temp
-
-# Add the cumulative interest of the minimum interest schedule
-min_label = labels[min_interest_index]
-min_cumulative_interest = cumulative_interest_df[min_label]
-
-# Compute the difference between each schedule and the minimum interest schedule
-for label in labels:
-    cumulative_interest_df[label] = cumulative_interest_df[label] - min_cumulative_interest
-
-# Plotting the four graphs
+# Create a four-panel plot
 fig, axs = plt.subplots(2, 2, figsize=(16, 12))
 
 # Define x-axis ticks (every 12 months up to the maximum month)
+max_month = max([schedule['month'].max() for schedule in options_list])
 x_ticks = list(range(0, int(max_month) + 12, 12))
 
 # Plot 1: Monthly Payments Over Time with breakdown
@@ -260,21 +224,19 @@ axs[1, 0].grid(True)
 axs[1, 0].set_xticks(x_ticks)
 axs[1, 0].set_xticklabels([str(int(x/12)) for x in x_ticks])
 
-# Plot 4: Difference in Cumulative Interest Paid Compared to Minimum Interest Schedule
-for label, color in zip(labels, colors):
-    # We don't plot the min_interest_schedule as its difference is zero
-    if label != min_label:
-        axs[1, 1].plot(
-            cumulative_interest_df.index,
-            cumulative_interest_df[label],
-            label=label,
-            color=color
-        )
+# Plot 4: Cumulative Interest Saved Over Time
+for schedule, label, color in zip(options_list, labels, colors):
+    axs[1, 1].plot(
+        schedule['month'],
+        schedule['cumulative_interest_saved'],
+        label=label,
+        color=color
+    )
 
 # Set title and labels for Plot 4
-axs[1, 1].set_title('Difference in Cumulative Interest Paid Compared to Minimum Interest Schedule')
+axs[1, 1].set_title('Cumulative Interest Saved Over Time')
 axs[1, 1].set_xlabel('Year')
-axs[1, 1].set_ylabel('Difference in Cumulative Interest Paid (€)')
+axs[1, 1].set_ylabel('Cumulative Interest Saved (€)')
 axs[1, 1].legend(fontsize='small')
 axs[1, 1].grid(True)
 axs[1, 1].set_xticks(x_ticks)
@@ -282,26 +244,5 @@ axs[1, 1].set_xticklabels([str(int(x/12)) for x in x_ticks])
 
 plt.tight_layout()
 plt.show()
-
-# # Plot 4: Cumulative Interest Saved Over Time
-# for schedule, label, color in zip(options_list, labels, colors):
-#     axs[1, 1].plot(
-#         schedule['month'],
-#         schedule['cumulative_interest_saved'],
-#         label=label,
-#         color=color
-#     )
-
-# # Set title and labels for Plot 4
-# axs[1, 1].set_title('Cumulative Interest Saved Over Time')
-# axs[1, 1].set_xlabel('Year')
-# axs[1, 1].set_ylabel('Cumulative Interest Saved (€)')
-# axs[1, 1].legend(fontsize='small')
-# axs[1, 1].grid(True)
-# axs[1, 1].set_xticks(x_ticks)
-# axs[1, 1].set_xticklabels([str(int(x/12)) for x in x_ticks])
-
-# plt.tight_layout()
-# plt.show()
 
 # %%
